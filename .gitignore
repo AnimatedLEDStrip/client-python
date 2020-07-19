@@ -1,0 +1,10 @@
+/.idea
+*.xml
+*.iml
+/venv
+test.py
+/animatedledstrip_client.egg-info
+/dist
+/.tox
+.coverage
+build/
