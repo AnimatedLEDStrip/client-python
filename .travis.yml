@@ -18,8 +18,6 @@ stages:
 
 jobs:
   include:
-    # Python
-
     - stage: test
       install: pip install tox tox-travis coverage
       script: tox
