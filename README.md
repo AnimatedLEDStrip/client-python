@@ -1,5 +1,9 @@
+# AnimatedLEDStrip Client Library for Python
+
 [![Build Status](https://travis-ci.com/AnimatedLEDStrip/client-python.svg?branch=master)](https://travis-ci.com/AnimatedLEDStrip/client-python)
 [![PyPI](https://img.shields.io/pypi/v/animatedledstrip-client.svg)](https://pypi.python.org/pypi/animatedledstrip-client)
+
+This library allows a Python 3 client to connect to an AnimatedLEDStrip server, allowing the client to send animations to the server and receive currently running animations from the server, among other information.
 
 ## Creating an `AnimationSender`
 An `AnimationSender` is constructed with two arguments:
