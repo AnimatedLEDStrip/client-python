@@ -39,6 +39,7 @@ class AnimationSender(object):
     running_animations: Dict[str, 'AnimationData'] = {}
     supported_animations: List['AnimationInfo'] = []
 
+    receiveCallback: Optional[Callable[[bytes], Any]] = None
     newAnimationDataCallback: Optional[Callable[['AnimationData'], Any]] = None
     newAnimationInfoCallback: Optional[Callable[['AnimationInfo'], Any]] = None
     newEndAnimationCallback: Optional[Callable[['EndAnimation'], Any]] = None
@@ -91,14 +92,18 @@ class AnimationSender(object):
 
     def parse_data(self):
         try:
-            input_bytes = self.connection.recv(4096)
+            all_input: bytes = self.connection.recv(4096)
 
             # Split up data (multiple may have come in the same message -
             #  they are split up with triple semicolons)
-            for input_str in input_bytes.split(DELIMITER):
-                if input_str.startswith(ANIMATION_DATA_PREFIX):
+            # TODO: Support partial data
+            for split_input in all_input.split(DELIMITER):
+                if self.receiveCallback:
+                    self.receiveCallback(split_input)
+
+                if split_input.startswith(ANIMATION_DATA_PREFIX):
                     # Create the AnimationData instance
-                    data = AnimationData.from_json(input_str)
+                    data = AnimationData.from_json(split_input)
 
                     # Add new animation to the running_animations dict
                     self.running_animations[data.id] = data
@@ -107,9 +112,9 @@ class AnimationSender(object):
                     if self.newAnimationDataCallback:
                         self.newAnimationDataCallback(data)
 
-                elif input_str.startswith(ANIMATION_INFO_PREFIX):
+                elif split_input.startswith(ANIMATION_INFO_PREFIX):
                     # Create the AnimationInfo instance
-                    info = AnimationInfo.from_json(input_str)
+                    info = AnimationInfo.from_json(split_input)
 
                     # Add new supported animation to the supported_animations list
                     self.supported_animations.append(info)
@@ -118,9 +123,9 @@ class AnimationSender(object):
                     if self.newAnimationInfoCallback:
                         self.newAnimationInfoCallback(info)
 
-                elif input_str.startswith(END_ANIMATION_PREFIX):
+                elif split_input.startswith(END_ANIMATION_PREFIX):
                     # Create the EndAnimation instance
-                    data = EndAnimation.from_json(input_str)
+                    data = EndAnimation.from_json(split_input)
 
                     # Remove animation if it's in the dict
                     del self.running_animations[data.id]
@@ -129,14 +134,14 @@ class AnimationSender(object):
                     if self.newEndAnimationCallback:
                         self.newEndAnimationCallback(data)
 
-                elif input_str.startswith(SECTION_PREFIX):
+                elif split_input.startswith(SECTION_PREFIX):
                     pass  # TODO
 
-                elif input_str.startswith(STRIP_INFO_PREFIX):
+                elif split_input.startswith(STRIP_INFO_PREFIX):
                     pass  # TODO
 
                 else:
-                    logging.warning('Unrecognized data type: {}'.format(input_str[:4]))
+                    logging.warning('Unrecognized data type: {}'.format(split_input[:4]))
 
         except socket.timeout:
             pass
