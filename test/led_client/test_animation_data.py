@@ -97,7 +97,7 @@ def test_delay():
     data.delay = 10
     assert data.check_data_types() is True
 
-    data.delay = Animation.BOUNCE
+    data.delay = Direction.BACKWARD
     with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
 
