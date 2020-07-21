@@ -39,7 +39,7 @@ color.add_color(0xFF00)
 data = AnimationData()
 data.add_color(color)
 
-sender.send_animation(data)
+sender.send_data(data)
 ```
 
 #### `AnimationData` type notes

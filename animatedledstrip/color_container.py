@@ -18,7 +18,7 @@
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
 
-from led_client.utils import check_data_type
+from .utils import check_data_type
 
 
 class ColorContainer(object):

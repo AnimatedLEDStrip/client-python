@@ -18,13 +18,40 @@
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
 
-from led_client.end_animation import EndAnimation
+import json
+from typing import AnyStr
+
+from .utils import check_data_type
 
 
-def test_end_animation_json():
-    end = EndAnimation()
-    end.id = '123456'
+class EndAnimation(object):
+    """Represents the ending of an animation"""
 
-    json = end.json()
+    def __init__(self):
+        self.id = ''
 
-    assert json == 'END :{"id":"123456"}'
+    def json(self) -> str:
+        self.check_data_types()
+
+        return 'END :{"id":"' + self.id + '"}'
+
+    @classmethod
+    def from_json(cls, input_str: AnyStr) -> 'EndAnimation':
+        """Create an EndAnimation instance from a JSON representation"""
+        # Parse the JSON
+        input_json = json.loads(input_str[5:])
+
+        # Create a new EndAnimation instance
+        new_instance = cls()
+
+        # Get property from the JSON, reverting to default if it can't be found
+        new_instance.id = input_json.get('id', new_instance.id)
+
+        # Double check that parameter has the right data type
+        new_instance.check_data_types()
+
+        return new_instance
+
+    def check_data_types(self) -> bool:
+        """Check that parameter type is correct"""
+        return check_data_type('id', self.id, str)

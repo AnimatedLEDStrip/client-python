@@ -19,7 +19,7 @@
 #   THE SOFTWARE.
 
 import json
-from typing import List, Optional, AnyStr
+from typing import AnyStr, List, Optional
 
 from .color_container import ColorContainer
 from .direction import *

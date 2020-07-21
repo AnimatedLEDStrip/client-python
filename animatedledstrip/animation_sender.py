@@ -17,10 +17,11 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
+
 import logging
 import socket
 from threading import Thread
-from typing import Optional, Dict, AnyStr, Callable, Any, List
+from typing import Any, AnyStr, Callable, Dict, List, Optional
 
 from .animation_data import AnimationData
 from .animation_info import AnimationInfo
@@ -78,7 +79,7 @@ class AnimationSender(object):
 
         return self
 
-    def send_animation(self, animation_json: AnyStr) -> 'AnimationSender':
+    def send_data(self, animation_json: AnyStr) -> 'AnimationSender':
         """Send a new animation to the server"""
         json_bytes = bytearray(animation_json, 'utf-8')
         self.connection.sendall(json_bytes)
@@ -98,6 +99,9 @@ class AnimationSender(object):
             #  they are split up with triple semicolons)
             # TODO: Support partial data
             for split_input in all_input.split(DELIMITER):
+                if len(split_input) == 0:
+                    continue
+
                 if self.receiveCallback:
                     self.receiveCallback(split_input)
 
@@ -141,7 +145,7 @@ class AnimationSender(object):
                     pass  # TODO
 
                 else:
-                    logging.warning('Unrecognized data type: {}'.format(split_input[:4]))
+                    logging.warning('Unrecognized data type: {} ({})'.format(split_input[:4], split_input))
 
         except socket.timeout:
             pass

@@ -20,8 +20,7 @@
 
 from unittest import mock
 
-from led_client import AnimationSender, AnimationData, Direction
-from led_client.param_usage import ParamUsage
+from animatedledstrip import AnimationSender, AnimationData, Direction, ParamUsage
 
 
 def test_constructor():
@@ -34,7 +33,7 @@ def test_constructor():
 @mock.patch.object(AnimationSender, 'connection')
 def test_send_animation(mock_socket):
     data = AnimationData().json()
-    AnimationSender('10.0.0.254', 5).send_animation(data)
+    AnimationSender('10.0.0.254', 5).send_data(data)
     assert mock_socket.sendall.called
     assert mock_socket.called_with(data)
 

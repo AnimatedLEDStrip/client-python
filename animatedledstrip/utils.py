@@ -19,7 +19,7 @@
 #   THE SOFTWARE.
 
 import logging
-from typing import TypeVar, Any, Optional
+from typing import Any, Optional, TypeVar
 
 from . import global_vars
 

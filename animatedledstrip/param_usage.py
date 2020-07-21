@@ -18,10 +18,9 @@
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
 
-from enum import Enum, auto
+from enum import auto, Enum
 
 
-class Direction(Enum):
-    """Enum representing each direction"""
-    FORWARD = auto()
-    BACKWARD = auto()
+class ParamUsage(Enum):
+    NOTUSED = auto()
+    USED = auto()

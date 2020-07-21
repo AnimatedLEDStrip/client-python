@@ -21,7 +21,7 @@
 import json
 from unittest import mock
 
-from led_client import ColorContainer
+from animatedledstrip import ColorContainer
 
 
 def test_add_color():
