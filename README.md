@@ -5,12 +5,21 @@
 
 This library allows a Python 3 client to connect to an AnimatedLEDStrip server, allowing the client to send animations to the server and receive currently running animations from the server, among other information.
 
+## Adding the Library to a Project
+The library is available via pip:
+
+```bash
+pip3 install animatedledstrip-client
+```
+
 ## Creating an `AnimationSender`
 An `AnimationSender` is constructed with two arguments:
 - `ip_address`: The IP address of the server (as a string)
 - `port_num`: The port that the client should connect to (as an integer)
 
 ```python
+from animatedledstrip import AnimationSender
+
 sender = AnimationSender("10.0.0.254", 5)
 ```
 
@@ -32,6 +41,8 @@ sender.end()
 An animation can be sent to the server by creating an instance of the `AnimationData` class, then calling `send_animation()` with the instance as the argument.
 
 ```python
+from animatedledstrip import AnimationData, ColorContainer
+
 color = ColorContainer()
 color.add_color(0xFF)
 color.add_color(0xFF00)
