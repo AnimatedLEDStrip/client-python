@@ -17,7 +17,7 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
-
+import socket
 from unittest import mock
 
 from animatedledstrip import AnimationSender, AnimationData, Direction, ParamUsage
@@ -28,6 +28,14 @@ def test_constructor():
 
     assert sender.address == '10.0.0.254'
     assert sender.port == 5
+    assert sender.connected is False
+    assert sender.recv_thread is None
+    assert sender.running_animations == {}
+    assert sender.supported_animations == []
+    assert sender.receiveCallback is None
+    assert sender.newAnimationDataCallback is None
+    assert sender.newAnimationInfoCallback is None
+    assert sender.newEndAnimationCallback is None
 
 
 @mock.patch.object(AnimationSender, 'connection')
@@ -108,6 +116,39 @@ def test_parse_data_animation_info(mock_socket, mock_callback):
 
     assert mock_callback.called
     assert mock_callback.called_with(info)
+
+    mock_socket.recv.return_value = bytes('AINF:{"name":"Multi Pixel Run","abbr":"MPR",'
+                                          '"description":"Similar to [Pixel Run](Pixel-Run) but with multiple LEDs '
+                                          'at a specified spacing.","signatureFile":"multi_pixel_run.png",'
+                                          '"repetitive":false,"minimumColors":1,"unlimitedColors":true,'
+                                          '"center":"USED","delay":"USED","direction":"USED",'
+                                          '"distance":"USED","spacing":"USED","delayDefault":1000,'
+                                          '"distanceDefault":10,"spacingDefault":30}', 'utf-8')
+
+    sender.parse_data()
+
+    assert len(sender.supported_animations) == 2
+
+    info2 = sender.supported_animations[1]
+
+    assert info2.name == 'Multi Pixel Run'
+    assert info2.abbr == 'MPR'
+    assert info2.description == 'Similar to [Pixel Run](Pixel-Run) but with multiple LEDs at a specified spacing.'
+    assert info2.signature_file == 'multi_pixel_run.png'
+    assert info2.repetitive is False
+    assert info2.minimum_colors == 1
+    assert info2.unlimited_colors is True
+    assert info2.center is ParamUsage.USED
+    assert info2.delay is ParamUsage.USED
+    assert info2.direction is ParamUsage.USED
+    assert info2.distance is ParamUsage.USED
+    assert info2.spacing is ParamUsage.USED
+    assert info2.delay_default == 1000
+    assert info2.distance_default == 10
+    assert info2.spacing_default == 30
+
+    assert mock_callback.called
+    assert mock_callback.called_with(info2)
 
 
 @mock.patch.object(AnimationSender, 'newEndAnimationCallback')

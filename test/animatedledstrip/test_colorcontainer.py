@@ -30,7 +30,7 @@ def test_add_color():
     color.add_color(0xFF)
     assert color.colors == [255]
 
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         # noinspection PyTypeChecker
         color.add_color(None)
     assert color.colors == [255]
@@ -62,7 +62,7 @@ def test_from_json():
     assert ColorContainer.from_json(color_json).colors == []
 
     color_json = json.loads('{"colors":["test"]}')
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert ColorContainer.from_json(color_json).colors == []
 
     try:

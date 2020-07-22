@@ -21,6 +21,12 @@
 from animatedledstrip import EndAnimation
 
 
+def test_constructor():
+    anim = EndAnimation()
+
+    assert anim.id == ''
+
+
 def test_end_animation_json():
     end = EndAnimation()
     end.id = '123456'

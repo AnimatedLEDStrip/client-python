@@ -38,15 +38,17 @@ def test_constructor():
     assert data.spacing == -1
 
 
-def test_animation():
+def test_animation(caplog):
     data = AnimationData()
 
     data.animation = 'Sparkle'
     assert data.check_data_types() is True
 
     data.animation = 3
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for animation: <class 'int'> (should be <class 'str'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -55,15 +57,17 @@ def test_animation():
         pass
 
 
-def test_center():
+def test_center(caplog):
     data = AnimationData()
 
     data.center = 5
     assert data.check_data_types() is True
 
     data.center = Direction.FORWARD
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for center: <enum 'Direction'> (should be <class 'int'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -72,7 +76,65 @@ def test_center():
         pass
 
 
-def test_continuous():
+def test_colors(caplog):
+    data = AnimationData()
+
+    data.colors = []
+    assert data.check_data_types() is True
+
+    data.colors = [ColorContainer()]
+    assert data.check_data_types() is True
+
+    data.colors = [ColorContainer(), ColorContainer()]
+    assert data.check_data_types() is True
+
+    try:
+        data.colors = Direction.FORWARD
+        with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
+            data.check_data_types()
+        raise AssertionError
+    except TypeError:
+        pass
+
+    try:
+        data.check_data_types()
+        raise AssertionError
+    except TypeError:
+        pass
+
+    data.colors = [Direction.FORWARD]
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
+        assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {
+            ("Bad data type for color: <enum 'Direction'> "
+             "(should be <class 'animatedledstrip.color_container.ColorContainer'>)", 'ERROR')
+        }
+        caplog.clear()
+
+    try:
+        data.check_data_types()
+        raise AssertionError
+    except TypeError:
+        pass
+
+    data.colors = [ColorContainer(), Direction.FORWARD]
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
+        assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {
+            ("Bad data type for color: <enum 'Direction'> "
+             "(should be <class 'animatedledstrip.color_container.ColorContainer'>)", 'ERROR')
+        }
+
+    try:
+        data.check_data_types()
+        raise AssertionError
+    except TypeError:
+        pass
+
+
+def test_continuous(caplog):
     data = AnimationData()
 
     data.continuous = True
@@ -82,8 +144,11 @@ def test_continuous():
     assert data.check_data_types() is True
 
     data.continuous = 5
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {
+            ("Bad data type for continuous: <class 'int'> (should be <class 'bool'> or None)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -92,15 +157,17 @@ def test_continuous():
         pass
 
 
-def test_delay():
+def test_delay(caplog):
     data = AnimationData()
 
     data.delay = 10
     assert data.check_data_types() is True
 
     data.delay = Direction.BACKWARD
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for delay: <enum 'Direction'> (should be <class 'int'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -109,15 +176,17 @@ def test_delay():
         pass
 
 
-def test_delay_mod():
+def test_delay_mod(caplog):
     data = AnimationData()
 
     data.delay_mod = 0.5
     assert data.check_data_types() is True
 
     data.delay_mod = 3
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for delay_mod: <class 'int'> (should be <class 'float'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -126,15 +195,17 @@ def test_delay_mod():
         pass
 
 
-def test_direction():
+def test_direction(caplog):
     data = AnimationData()
 
     data.direction = Direction.BACKWARD
     assert data.check_data_types() is True
 
     data.direction = 1
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for direction: <class 'int'> (should be <enum 'Direction'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -143,15 +214,17 @@ def test_direction():
         pass
 
 
-def test_distance():
+def test_distance(caplog):
     data = AnimationData()
 
     data.distance = 5
     assert data.check_data_types() is True
 
     data.distance = 5.0
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for distance: <class 'float'> (should be <class 'int'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -160,15 +233,17 @@ def test_distance():
         pass
 
 
-def test_id():
+def test_id(caplog):
     data = AnimationData()
 
     data.id = 'TEST'
     assert data.check_data_types() is True
 
     data.id = 5
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for id: <class 'int'> (should be <class 'str'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -177,15 +252,17 @@ def test_id():
         pass
 
 
-def test_section():
+def test_section(caplog):
     data = AnimationData()
 
     data.section = 'SECT'
     assert data.check_data_types() is True
 
     data.section = 5
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for section: <class 'int'> (should be <class 'str'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -194,15 +271,17 @@ def test_section():
         pass
 
 
-def test_spacing():
+def test_spacing(caplog):
     data = AnimationData()
 
     data.spacing = 10
     assert data.check_data_types() is True
 
     data.spacing = 3.0
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.check_data_types() is False
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+        assert log_messages == {("Bad data type for spacing: <class 'float'> (should be <class 'int'>)", 'ERROR')}
 
     try:
         data.check_data_types()
@@ -262,7 +341,7 @@ def test_json_bad_type():
     data = AnimationData()
     data.spacing = 1.5
 
-    with mock.patch('led_client.global_vars.STRICT_TYPE_CHECKING', False):
+    with mock.patch('animatedledstrip.global_vars.STRICT_TYPE_CHECKING', False):
         assert data.json() == ''
 
     try:

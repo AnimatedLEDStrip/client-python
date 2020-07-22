@@ -109,6 +109,7 @@ class AnimationData(object):
         good_types = True
 
         good_types = good_types and check_data_type('animation', self.animation, str)
+        check_data_type('colors', self.colors, list, force_strict=True)
         for color_container in self.colors:
             good_types = good_types and check_data_type('color', color_container, ColorContainer)
         good_types = good_types and check_data_type('center', self.center, int)

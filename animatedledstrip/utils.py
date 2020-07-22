@@ -32,7 +32,8 @@ def nullable_str(value: Optional[Any]) -> str:
         return str(value)
 
 
-def check_data_type(name: str, param: Any, correct_type: TypeVar, allow_none: bool = False) -> bool:
+def check_data_type(name: str, param: Any, correct_type: TypeVar, *,
+                    allow_none: bool = False, force_strict: bool = False) -> bool:
     """Check that a parameter has the correct data type
 
     If it does not, then when STRICT_TYPE_CHECKING is:
@@ -49,7 +50,7 @@ def check_data_type(name: str, param: Any, correct_type: TypeVar, allow_none: bo
                                                             cor_type=str(correct_type),
                                                             none_allowed=" or None" if allow_none else "")
 
-        if global_vars.STRICT_TYPE_CHECKING:
+        if force_strict or global_vars.STRICT_TYPE_CHECKING:
             # Type was incorrect and STRICT_TYPE_CHECKING is True, raise TypeError with message
             raise TypeError(msg)
         else:
