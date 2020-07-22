@@ -1,4 +1,4 @@
-from led_client import AnimationSender
+from animatedledstrip import AnimationSender
 
 
 sender = AnimationSender("10.0.0.55", 6)

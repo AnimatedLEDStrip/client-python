@@ -27,27 +27,27 @@ from .animation_data import AnimationData
 from .animation_info import AnimationInfo
 from .end_animation import EndAnimation
 from .global_vars import *
+from .strip_info import StripInfo
 
 
 class AnimationSender(object):
     """Handles communications with the server"""
 
-    address: str
-    port: int
-    connection: 'socket.socket' = socket.socket()
-    connected: bool = False
-    recv_thread: Optional['Thread'] = None
-    running_animations: Dict[str, 'AnimationData'] = {}
-    supported_animations: List['AnimationInfo'] = []
-
-    receiveCallback: Optional[Callable[[bytes], Any]] = None
-    newAnimationDataCallback: Optional[Callable[['AnimationData'], Any]] = None
-    newAnimationInfoCallback: Optional[Callable[['AnimationInfo'], Any]] = None
-    newEndAnimationCallback: Optional[Callable[['EndAnimation'], Any]] = None
-
     def __init__(self, ip_address: str, port_num: int):
         self.address: str = ip_address
         self.port: int = port_num
+        self.connection: 'socket.socket' = socket.socket()
+        self.connected: bool = False
+        self.recv_thread: Optional['Thread'] = None
+        self.running_animations: Dict[str, 'AnimationData'] = {}
+        self.stripInfo: Optional['StripInfo'] = None
+        self.supported_animations: List['AnimationInfo'] = []
+
+        self.receiveCallback: Optional[Callable[[bytes], Any]] = None
+        self.newAnimationDataCallback: Optional[Callable[['AnimationData'], Any]] = None
+        self.newAnimationInfoCallback: Optional[Callable[['AnimationInfo'], Any]] = None
+        self.newEndAnimationCallback: Optional[Callable[['EndAnimation'], Any]] = None
+        self.newStripInfoCallback: Optional[Callable[['StripInfo'], Any]] = None
 
     def start(self) -> 'AnimationSender':
         """Connect to the server"""
@@ -70,6 +70,8 @@ class AnimationSender(object):
 
         # Connection has been closed, so set connected = False
         self.connected = False
+
+        self.stripInfo = None
 
         # If the separate thread for receiving animations was started, join it with the main thread.
         # The loop should stop because the connection is closed and connected is False,
@@ -142,7 +144,14 @@ class AnimationSender(object):
                     pass  # TODO
 
                 elif split_input.startswith(STRIP_INFO_PREFIX):
-                    pass  # TODO
+                    # Create the StripInfo instance
+                    info = StripInfo.from_json(split_input)
+
+                    self.stripInfo = info
+
+                    # Call callback
+                    if self.newStripInfoCallback:
+                        self.newStripInfoCallback(info)
 
                 else:
                     logging.warning('Unrecognized data type: {} ({})'.format(split_input[:4], split_input))

@@ -7,3 +7,4 @@ from .end_animation import EndAnimation
 from .global_vars import ANIMATION_DATA_PREFIX, ANIMATION_INFO_PREFIX, DELIMITER, \
     END_ANIMATION_PREFIX, SECTION_PREFIX, STRICT_TYPE_CHECKING, STRIP_INFO_PREFIX
 from .param_usage import ParamUsage
+from .strip_info import StripInfo

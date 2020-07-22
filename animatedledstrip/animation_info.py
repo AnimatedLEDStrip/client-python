@@ -46,7 +46,7 @@ class AnimationInfo(object):
         self.spacing_default: int = 3
 
     @classmethod
-    def from_json(cls, input_str: AnyStr):
+    def from_json(cls, input_str: AnyStr) -> 'AnimationInfo':
         """Create an AnimationInfo instance from a JSON representation"""
         # Parse the JSON
         input_json = json.loads(input_str[5:])
