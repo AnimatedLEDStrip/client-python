@@ -32,7 +32,7 @@ sender.start()
 ```
 
 ## Stopping the `AnimationSender`
-An `AnimationSender` is started by calling the `end()` method on the instance.
+An `AnimationSender` is stopped by calling the `end()` method on the instance.
 
 ```python
 sender.end()

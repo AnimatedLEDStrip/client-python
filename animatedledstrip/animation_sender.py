@@ -27,6 +27,7 @@ from .animation_data import AnimationData
 from .animation_info import AnimationInfo
 from .end_animation import EndAnimation
 from .global_vars import *
+from .section import Section
 from .strip_info import StripInfo
 
 
@@ -40,6 +41,7 @@ class AnimationSender(object):
         self.connected: bool = False
         self.recv_thread: Optional['Thread'] = None
         self.running_animations: Dict[str, 'AnimationData'] = {}
+        self.sections: Dict[str, 'Section'] = {}
         self.stripInfo: Optional['StripInfo'] = None
         self.supported_animations: List['AnimationInfo'] = []
 
@@ -47,6 +49,7 @@ class AnimationSender(object):
         self.newAnimationDataCallback: Optional[Callable[['AnimationData'], Any]] = None
         self.newAnimationInfoCallback: Optional[Callable[['AnimationInfo'], Any]] = None
         self.newEndAnimationCallback: Optional[Callable[['EndAnimation'], Any]] = None
+        self.newSectionCallback: Optional[Callable[['Section'], Any]] = None
         self.newStripInfoCallback: Optional[Callable[['StripInfo'], Any]] = None
 
     def start(self) -> 'AnimationSender':
@@ -141,7 +144,15 @@ class AnimationSender(object):
                         self.newEndAnimationCallback(data)
 
                 elif split_input.startswith(SECTION_PREFIX):
-                    pass  # TODO
+                    # Create the EndAnimation instance
+                    sect = Section.from_json(split_input)
+
+                    # Add new section to the sections dict
+                    self.sections[sect.name] = sect
+
+                    # Call callback
+                    if self.newSectionCallback:
+                        self.newSectionCallback(sect)
 
                 elif split_input.startswith(STRIP_INFO_PREFIX):
                     # Create the StripInfo instance

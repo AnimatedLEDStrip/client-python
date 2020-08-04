@@ -37,6 +37,7 @@ def test_constructor():
     assert sender.newAnimationDataCallback is None
     assert sender.newAnimationInfoCallback is None
     assert sender.newEndAnimationCallback is None
+    assert sender.newSectionCallback is None
     assert sender.newStripInfoCallback is None
 
 
@@ -177,6 +178,31 @@ def test_parse_data_end_animation():
             assert '52782797' not in sender.running_animations.keys()
 
             assert mock_callback.called
+
+
+def test_parse_data_section():
+    sender = AnimationSender('10.0.0.254', 5)
+
+    with mock.patch.object(sender, 'connection') as mock_socket:
+        with mock.patch.object(sender, 'newSectionCallback') as mock_callback:
+            mock_socket.recv.return_value = bytes('SECT:{"physicalStart":0,"numLEDs":240,"name":"section",'
+                                                  '"startPixel":0,"endPixel":239}',
+                                                  'utf-8')
+
+            sender.parse_data()
+
+            assert 'section' in sender.sections
+
+            sect = sender.sections['section']
+
+            assert sect.name == 'section'
+            assert sect.start_pixel == 0
+            assert sect.end_pixel == 239
+            assert sect.physical_start == 0
+            assert sect.num_leds == 240
+
+            assert mock_callback.called
+            assert mock_callback.called_with(sect)
 
 
 def test_parse_data_strip_info():
