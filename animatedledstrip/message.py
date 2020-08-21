@@ -18,17 +18,35 @@
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
 
+import json
+from typing import AnyStr
 
-# Should incorrect data types cause a TypeError (True)
-#  or a log message (False)
-STRICT_TYPE_CHECKING: bool = True
+from .utils import check_data_type
 
-DELIMITER: bytes = bytes(';;;', 'utf-8')
 
-ANIMATION_DATA_PREFIX: bytes = bytes('DATA:', 'utf-8')
-ANIMATION_INFO_PREFIX: bytes = bytes('AINF:', 'utf-8')
-COMMAND_PREFIX: bytes = bytes('CMD :', 'utf-8')
-END_ANIMATION_PREFIX: bytes = bytes('END :', 'utf-8')
-MESSAGE_PREFIX: bytes = bytes('MSG :', 'utf-8')
-SECTION_PREFIX: bytes = bytes('SECT:', 'utf-8')
-STRIP_INFO_PREFIX: bytes = bytes('SINF:', 'utf-8')
+class Message(object):
+    """A message from the server"""
+
+    def __init__(self):
+        self.message: str = ''
+
+    @classmethod
+    def from_json(cls, input_str: AnyStr) -> 'Message':
+        """Create an AnimationData instance from a JSON representation"""
+        # Parse the JSON
+        input_json = json.loads(input_str[5:])
+
+        # Create a new Message instance
+        new_instance = cls()
+
+        # Get each property from the JSON, reverting to defaults if it can't be found
+        new_instance.message = input_json.get('message', new_instance.message)
+
+        # Double check that everything has the right data type
+        new_instance.check_data_types()
+
+        return new_instance
+
+    def check_data_types(self) -> bool:
+        """Check that all parameter types are correct"""
+        return check_data_type('message', self.message, str)

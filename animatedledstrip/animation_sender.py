@@ -27,6 +27,7 @@ from .animation_data import AnimationData
 from .animation_info import AnimationInfo
 from .end_animation import EndAnimation
 from .global_vars import *
+from .message import Message
 from .section import Section
 from .strip_info import StripInfo
 
@@ -39,21 +40,40 @@ class AnimationSender(object):
         self.port: int = port_num
         self.connection: 'socket.socket' = socket.socket()
         self.connected: bool = False
+        self.started: bool = False
         self.recv_thread: Optional['Thread'] = None
+
         self.running_animations: Dict[str, 'AnimationData'] = {}
         self.sections: Dict[str, 'Section'] = {}
-        self.stripInfo: Optional['StripInfo'] = None
         self.supported_animations: List['AnimationInfo'] = []
+        self.strip_info: Optional['StripInfo'] = None
 
-        self.receiveCallback: Optional[Callable[[bytes], Any]] = None
-        self.newAnimationDataCallback: Optional[Callable[['AnimationData'], Any]] = None
-        self.newAnimationInfoCallback: Optional[Callable[['AnimationInfo'], Any]] = None
-        self.newEndAnimationCallback: Optional[Callable[['EndAnimation'], Any]] = None
-        self.newSectionCallback: Optional[Callable[['Section'], Any]] = None
-        self.newStripInfoCallback: Optional[Callable[['StripInfo'], Any]] = None
+        self.on_connect_callback: Optional[Callable[[str, int], Any]] = None
+        self.on_disconnect_callback: Optional[Callable[[str, int], Any]] = None
+        self.on_unable_to_connect_callback: Optional[Callable[[str, int], Any]] = None
+
+        self.on_receive_callback: Optional[Callable[[bytes], Any]] = None
+        self.on_new_animation_data_callback: Optional[Callable[['AnimationData'], Any]] = None
+        self.on_new_animation_info_callback: Optional[Callable[['AnimationInfo'], Any]] = None
+        self.on_new_end_animation_callback: Optional[Callable[['EndAnimation'], Any]] = None
+        self.on_new_message_callback: Optional[Callable[['Message'], Any]] = None
+        self.on_new_section_callback: Optional[Callable[['Section'], Any]] = None
+        self.on_new_strip_info_callback: Optional[Callable[['StripInfo'], Any]] = None
+
+        self.partial_data: bytes = b''
 
     def start(self) -> 'AnimationSender':
         """Connect to the server"""
+        if self.started:
+            return self
+
+        self.running_animations.clear()
+        self.sections.clear()
+        self.supported_animations.clear()
+        self.strip_info = None
+
+        self.started = True
+
         # Attempt to connect to the server
         self.connection = socket.create_connection((self.address, self.port), timeout=2.0)
 
@@ -74,7 +94,7 @@ class AnimationSender(object):
         # Connection has been closed, so set connected = False
         self.connected = False
 
-        self.stripInfo = None
+        self.strip_info = None
 
         # If the separate thread for receiving animations was started, join it with the main thread.
         # The loop should stop because the connection is closed and connected is False,
@@ -100,15 +120,26 @@ class AnimationSender(object):
         try:
             all_input: bytes = self.connection.recv(4096)
 
+            # Handle any partial data from previous communications
+            complete_input: bytes = self.partial_data + all_input
+            self.partial_data = b''
+
             # Split up data (multiple may have come in the same message -
             #  they are split up with triple semicolons)
-            # TODO: Support partial data
-            for split_input in all_input.split(DELIMITER):
+            input_list = complete_input.split(DELIMITER)
+
+            # If last input is partial, save for later when the rest comes
+            if not complete_input.endswith(DELIMITER):
+                self.partial_data = input_list[-1]
+                input_list = input_list[:-1]
+
+            # Process inputs
+            for split_input in input_list:
                 if len(split_input) == 0:
                     continue
 
-                if self.receiveCallback:
-                    self.receiveCallback(split_input)
+                if self.on_receive_callback:
+                    self.on_receive_callback(split_input)
 
                 if split_input.startswith(ANIMATION_DATA_PREFIX):
                     # Create the AnimationData instance
@@ -118,8 +149,8 @@ class AnimationSender(object):
                     self.running_animations[data.id] = data
 
                     # Call callback
-                    if self.newAnimationDataCallback:
-                        self.newAnimationDataCallback(data)
+                    if self.on_new_animation_data_callback:
+                        self.on_new_animation_data_callback(data)
 
                 elif split_input.startswith(ANIMATION_INFO_PREFIX):
                     # Create the AnimationInfo instance
@@ -129,8 +160,11 @@ class AnimationSender(object):
                     self.supported_animations.append(info)
 
                     # Call callback
-                    if self.newAnimationInfoCallback:
-                        self.newAnimationInfoCallback(info)
+                    if self.on_new_animation_info_callback:
+                        self.on_new_animation_info_callback(info)
+
+                elif split_input.startswith(COMMAND_PREFIX):
+                    logging.warning("Receiving Command is not supported by client")
 
                 elif split_input.startswith(END_ANIMATION_PREFIX):
                     # Create the EndAnimation instance
@@ -140,32 +174,40 @@ class AnimationSender(object):
                     del self.running_animations[data.id]
 
                     # Call callback
-                    if self.newEndAnimationCallback:
-                        self.newEndAnimationCallback(data)
+                    if self.on_new_end_animation_callback:
+                        self.on_new_end_animation_callback(data)
+
+                elif split_input.startswith(MESSAGE_PREFIX):
+                    # Create the Message instance
+                    msg = Message.from_json(split_input)
+
+                    # Call callback
+                    if self.on_new_message_callback:
+                        self.on_new_message_callback(msg)
 
                 elif split_input.startswith(SECTION_PREFIX):
-                    # Create the EndAnimation instance
+                    # Create the Section instance
                     sect = Section.from_json(split_input)
 
                     # Add new section to the sections dict
                     self.sections[sect.name] = sect
 
                     # Call callback
-                    if self.newSectionCallback:
-                        self.newSectionCallback(sect)
+                    if self.on_new_section_callback:
+                        self.on_new_section_callback(sect)
 
                 elif split_input.startswith(STRIP_INFO_PREFIX):
                     # Create the StripInfo instance
                     info = StripInfo.from_json(split_input)
 
-                    self.stripInfo = info
+                    self.strip_info = info
 
                     # Call callback
-                    if self.newStripInfoCallback:
-                        self.newStripInfoCallback(info)
+                    if self.on_new_strip_info_callback:
+                        self.on_new_strip_info_callback(info)
 
                 else:
-                    logging.warning('Unrecognized data type: {} ({})'.format(split_input[:4], split_input))
+                    logging.warning('Unrecognized data type: {}'.format(split_input[:4]))
 
         except socket.timeout:
             pass

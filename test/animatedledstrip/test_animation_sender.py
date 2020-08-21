@@ -31,14 +31,14 @@ def test_constructor():
     assert sender.connected is False
     assert sender.recv_thread is None
     assert sender.running_animations == {}
-    assert sender.stripInfo is None
+    assert sender.strip_info is None
     assert sender.supported_animations == []
-    assert sender.receiveCallback is None
-    assert sender.newAnimationDataCallback is None
-    assert sender.newAnimationInfoCallback is None
-    assert sender.newEndAnimationCallback is None
-    assert sender.newSectionCallback is None
-    assert sender.newStripInfoCallback is None
+    assert sender.on_receive_callback is None
+    assert sender.on_new_animation_data_callback is None
+    assert sender.on_new_animation_info_callback is None
+    assert sender.on_new_end_animation_callback is None
+    assert sender.on_new_section_callback is None
+    assert sender.on_new_strip_info_callback is None
 
 
 def test_send_animation():
@@ -216,9 +216,9 @@ def test_parse_data_strip_info():
 
             sender.parse_data()
 
-            assert sender.stripInfo is not None
+            assert sender.strip_info is not None
 
-            info = sender.stripInfo
+            info = sender.strip_info
 
             assert info.num_leds == 240
             assert info.pin == 12
@@ -236,9 +236,9 @@ def test_parse_data_strip_info():
 
             sender.parse_data()
 
-            assert sender.stripInfo is not None
+            assert sender.strip_info is not None
 
-            info2 = sender.stripInfo
+            info2 = sender.strip_info
 
             assert info2.num_leds == 20
             assert info2.pin is None

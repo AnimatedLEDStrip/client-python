@@ -18,17 +18,26 @@
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
 
+from .utils import check_data_type
 
-# Should incorrect data types cause a TypeError (True)
-#  or a log message (False)
-STRICT_TYPE_CHECKING: bool = True
 
-DELIMITER: bytes = bytes(';;;', 'utf-8')
+class Command(object):
+    """A command to send to the server"""
 
-ANIMATION_DATA_PREFIX: bytes = bytes('DATA:', 'utf-8')
-ANIMATION_INFO_PREFIX: bytes = bytes('AINF:', 'utf-8')
-COMMAND_PREFIX: bytes = bytes('CMD :', 'utf-8')
-END_ANIMATION_PREFIX: bytes = bytes('END :', 'utf-8')
-MESSAGE_PREFIX: bytes = bytes('MSG :', 'utf-8')
-SECTION_PREFIX: bytes = bytes('SECT:', 'utf-8')
-STRIP_INFO_PREFIX: bytes = bytes('SINF:', 'utf-8')
+    def __init__(self):
+        self.command = ''
+
+    def json(self) -> str:
+        """Create a JSON representation of this instance"""
+        if self.check_data_types() is False:
+            # If something has a bad data type (and STRICT_TYPE_CHECKING is False), return an empty string
+            return ''
+        else:
+            # Otherwise, create the JSON representation and return it
+            return ''.join(['CMD :{',
+                            '"command":"{}"'.format(self.command),
+                            '}'])
+
+    def check_data_types(self) -> bool:
+        """Check that all parameter types are correct"""
+        return check_data_type('message', self.command, str)

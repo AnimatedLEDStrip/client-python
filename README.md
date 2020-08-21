@@ -74,7 +74,7 @@ Runs before `newAnimationDataCallback`, `newAnimationInfoCallback`, `newEndAnima
 def receiveData(data: bytes):
     # Your code here
 
-sender.receiveCallback = receiveData
+sender.on_receive_callback = receiveData
 ```
 
 ### NewAnimationDataCallback
@@ -86,7 +86,7 @@ Runs after the `receiveCallback`.
 def processAnimationData(data: 'AnimationData'):
     # Your code here
 
-sender.newAnimationDataCallback = processAnimationData
+sender.on_new_animation_data_callback = processAnimationData
 ```
 
 ### NewAnimationInfoCallback
@@ -98,7 +98,7 @@ Runs after the `receiveCallback`.
 def handleNewAnimationInfo(info: 'AnimationInfo'):
     # Your code here
 
-sender.newAnimationInfoCallback = handleNewAnimationInfo
+sender.on_new_animation_info_callback = handleNewAnimationInfo
 ```
 
 ### NewEndAnimationCallback
@@ -110,7 +110,7 @@ Runs after the `receiveCallback`.
 def handleEndAnimation(anim: 'EndAnimation'):
     # Your code here
 
-sender.newEndAnimationCallback = handleEndAnimation
+sender.on_new_end_animation_callback = handleEndAnimation
 ```
 
 ### NewSectionCallback *(Coming soon)*
@@ -122,7 +122,7 @@ Runs after the `receiveCallback`.
 def newSectionHandler(sect: 'Section'):
     # Your code here
 
-sender.newSectionCallback = newSectionHandler
+sender.on_new_section_callback = newSectionHandler
 ```
 
 ### NewStripInfoCallback *(Coming soon)*
@@ -134,5 +134,5 @@ Runs after the `receiveCallback`.
 def processStripInfo(info: 'StripInfo'):
     # Your code here
 
-sender.newStripInfoCallback = processStripInfo
+sender.on_new_strip_info_callback = processStripInfo
 ```

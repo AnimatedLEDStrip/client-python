@@ -1,14 +1,14 @@
 from animatedledstrip import AnimationSender
 
 
-sender = AnimationSender("10.0.0.55", 6)
+sender = AnimationSender("10.44.167.23", 6)
 
 
 def receive(data: bytes):
     print(str(data) + '\n')
 
 
-sender.receiveCallback = receive
+sender.on_receive_callback = receive
 
 sender.start()
 
