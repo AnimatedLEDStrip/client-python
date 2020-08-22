@@ -207,7 +207,7 @@ class AnimationSender(object):
                         self.on_new_strip_info_callback(info)
 
                 else:
-                    logging.warning('Unrecognized data type: {}'.format(split_input[:4]))
+                    logging.warning('Unrecognized data type: {}'.format(str(split_input[:4], 'utf-8')))
 
         except socket.timeout:
             pass

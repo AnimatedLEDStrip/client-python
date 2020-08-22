@@ -17,7 +17,7 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
-import socket
+
 from unittest import mock
 
 from animatedledstrip import AnimationSender, AnimationData, Direction, ParamUsage
@@ -37,6 +37,7 @@ def test_constructor():
     assert sender.on_new_animation_data_callback is None
     assert sender.on_new_animation_info_callback is None
     assert sender.on_new_end_animation_callback is None
+    assert sender.on_new_message_callback is None
     assert sender.on_new_section_callback is None
     assert sender.on_new_strip_info_callback is None
 
@@ -54,11 +55,11 @@ def test_parse_data_animation_data():
     sender = AnimationSender('10.0.0.254', 5)
 
     with mock.patch.object(sender, 'connection') as mock_socket:
-        with mock.patch.object(sender, 'newAnimationDataCallback') as mock_callback:
+        with mock.patch.object(sender, 'on_new_animation_data_callback') as mock_callback:
             mock_socket.recv.return_value = bytes('DATA:{"animation":"Meteor","baseDelay":10,"center":120,'
                                                   '"colors":[{"colors":[16711680]}],"continuous":null,'
                                                   '"delayMod":1.0,"direction":"FORWARD","distance":240,'
-                                                  '"id":"52782797","section":"","spacing":3}', 'utf-8')
+                                                  '"id":"52782797","section":"","spacing":3};;;', 'utf-8')
 
             sender.parse_data()
 
@@ -87,14 +88,14 @@ def test_parse_data_animation_info():
     sender = AnimationSender('10.0.0.254', 5)
 
     with mock.patch.object(sender, 'connection') as mock_socket:
-        with mock.patch.object(sender, 'newAnimationInfoCallback') as mock_callback:
+        with mock.patch.object(sender, 'on_new_animation_info_callback') as mock_callback:
             mock_socket.recv.return_value = bytes('AINF:{"name":"Multi Pixel Run","abbr":"MPR",'
                                                   '"description":"Similar to [Pixel Run](Pixel-Run) but with multiple '
                                                   'LEDs at a specified spacing.","signatureFile":"multi_pixel_run.png",'
                                                   '"repetitive":true,"minimumColors":1,"unlimitedColors":false,'
                                                   '"center":"NOTUSED","delay":"USED","direction":"USED",'
                                                   '"distance":"NOTUSED","spacing":"USED","delayDefault":100,'
-                                                  '"distanceDefault":-1,"spacingDefault":3}', 'utf-8')
+                                                  '"distanceDefault":-1,"spacingDefault":3};;;', 'utf-8')
 
             sender.parse_data()
 
@@ -128,7 +129,7 @@ def test_parse_data_animation_info():
                                                   '"repetitive":false,"minimumColors":1,"unlimitedColors":true,'
                                                   '"center":"USED","delay":"USED","direction":"USED",'
                                                   '"distance":"USED","spacing":"USED","delayDefault":1000,'
-                                                  '"distanceDefault":10,"spacingDefault":30}', 'utf-8')
+                                                  '"distanceDefault":10,"spacingDefault":30};;;', 'utf-8')
 
             sender.parse_data()
 
@@ -157,21 +158,34 @@ def test_parse_data_animation_info():
             assert mock_callback.called_with(info2)
 
 
+def test_parse_data_command(caplog):
+    sender = AnimationSender('10.0.0.254', 5)
+
+    with mock.patch.object(sender, 'connection') as mock_socket:
+        mock_socket.recv.return_value = bytes('CMD :{"command":"test_command"};;;', 'utf-8')
+
+        sender.parse_data()
+
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+
+        assert log_messages == {('Receiving Command is not supported by client', 'WARNING')}
+
+
 def test_parse_data_end_animation():
     sender = AnimationSender('10.0.0.254', 5)
 
     with mock.patch.object(sender, 'connection') as mock_socket:
-        with mock.patch.object(sender, 'newEndAnimationCallback') as mock_callback:
+        with mock.patch.object(sender, 'on_new_end_animation_callback') as mock_callback:
             mock_socket.recv.return_value = bytes('DATA:{"animation":"Meteor","baseDelay":10,"center":120,'
                                                   '"colors":[{"colors":[16711680]}],"continuous":null,'
                                                   '"delayMod":1.0,"direction":"FORWARD","distance":240,'
-                                                  '"id":"52782797","section":"","spacing":3}', 'utf-8')
+                                                  '"id":"52782797","section":"","spacing":3};;;', 'utf-8')
 
             sender.parse_data()
 
             assert '52782797' in sender.running_animations.keys()
 
-            mock_socket.recv.return_value = bytes('END :{"id":"52782797"}', 'utf-8')
+            mock_socket.recv.return_value = bytes('END :{"id":"52782797"};;;', 'utf-8')
 
             sender.parse_data()
 
@@ -180,13 +194,27 @@ def test_parse_data_end_animation():
             assert mock_callback.called
 
 
+def test_parse_data_message():
+    sender = AnimationSender('10.0.0.254', 5)
+
+    with mock.patch.object(sender, 'connection') as mock_socket:
+        with mock.patch.object(sender, 'on_new_message_callback') as mock_callback:
+            mock_socket.recv.return_value = bytes('MSG :{"message":"a message"};;;',
+                                                  'utf-8')
+
+            sender.parse_data()
+
+            assert mock_callback.called
+            assert mock_callback.called_with('a message')
+
+
 def test_parse_data_section():
     sender = AnimationSender('10.0.0.254', 5)
 
     with mock.patch.object(sender, 'connection') as mock_socket:
-        with mock.patch.object(sender, 'newSectionCallback') as mock_callback:
+        with mock.patch.object(sender, 'on_new_section_callback') as mock_callback:
             mock_socket.recv.return_value = bytes('SECT:{"physicalStart":0,"numLEDs":240,"name":"section",'
-                                                  '"startPixel":0,"endPixel":239}',
+                                                  '"startPixel":0,"endPixel":239};;;',
                                                   'utf-8')
 
             sender.parse_data()
@@ -209,9 +237,9 @@ def test_parse_data_strip_info():
     sender = AnimationSender('10.0.0.254', 5)
 
     with mock.patch.object(sender, 'connection') as mock_socket:
-        with mock.patch.object(sender, 'newStripInfoCallback') as mock_callback:
+        with mock.patch.object(sender, 'on_new_strip_info_callback') as mock_callback:
             mock_socket.recv.return_value = bytes('SINF:{"numLEDs":240,"pin":12,"imageDebugging":false,'
-                                                  '"fileName":"test.csv","rendersBeforeSave":1000,"threadCount":100}',
+                                                  '"fileName":"test.csv","rendersBeforeSave":1000,"threadCount":100};;;',
                                                   'utf-8')
 
             sender.parse_data()
@@ -231,7 +259,7 @@ def test_parse_data_strip_info():
             assert mock_callback.called_with(info)
 
             mock_socket.recv.return_value = bytes('SINF:{"numLEDs":20,"pin":null,"imageDebugging":true,'
-                                                  '"fileName":null,"rendersBeforeSave":null,"threadCount":20}',
+                                                  '"fileName":null,"rendersBeforeSave":null,"threadCount":20};;;',
                                                   'utf-8')
 
             sender.parse_data()
@@ -252,4 +280,13 @@ def test_parse_data_strip_info():
 
 
 def test_parse_data_bad_data_type(caplog):
-    pass
+    sender = AnimationSender('10.0.0.254', 5)
+
+    with mock.patch.object(sender, 'connection') as mock_socket:
+        mock_socket.recv.return_value = bytes('BAD :{};;;', 'utf-8')
+
+        sender.parse_data()
+
+        log_messages = {(log.msg, log.levelname) for log in caplog.records}
+
+        assert log_messages == {('Unrecognized data type: BAD ', 'WARNING')}

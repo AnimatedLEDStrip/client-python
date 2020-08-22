@@ -18,26 +18,17 @@
 #   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #   THE SOFTWARE.
 
-from animatedledstrip import EndAnimation
+from animatedledstrip import Command
 
 
 def test_constructor():
-    anim = EndAnimation()
+    cmd = Command()
 
-    assert anim.id == ''
-
-
-def test_end_animation_json():
-    end = EndAnimation()
-    end.id = '123456'
-
-    assert end.json() == 'END :{"id":"123456"}'
+    assert cmd.command == ''
 
 
-def test_end_animation_from_json():
-    end_json = 'END :{"id":"testId"}'
+def test_command_json():
+    cmd = Command()
+    cmd.command = 'test_command'
 
-    end = EndAnimation.from_json(end_json)
-    assert end.id == 'testId'
-
-    assert end.json() == 'END :{"id":"testId"}'
+    assert cmd.json() == 'CMD :{"command":"test_command"}'
