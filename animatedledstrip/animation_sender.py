@@ -21,22 +21,24 @@
 import logging
 import socket
 from threading import Thread
-from typing import Any, AnyStr, Callable, Dict, List, Optional
+from typing import Any, AnyStr, Callable, Dict, List, Optional, Union
 
 from .animation_info import AnimationInfo
 from .animation_to_run_params import AnimationToRunParams
+from .client_params import ClientParams
 from .command import Command
 from .current_strip_color import CurrentStripColor
 from .end_animation import EndAnimation
 from .global_vars import *
 from .json_decoder import ALSJsonDecoder
+from .json_encoder import ALSJsonEncoder
 from .message import Message
 from .running_animation_params import RunningAnimationParams
 from .section import Section
 from .strip_info import StripInfo
 
 
-class AnimationSender(object):
+class AnimationSender:
     """Handles communications with the server"""
 
     def __init__(self, ip_address: str, port_num: int):
@@ -65,6 +67,7 @@ class AnimationSender(object):
         self.on_new_section_callback: Optional[Callable[['Section'], Any]] = None
         self.on_new_strip_info_callback: Optional[Callable[['StripInfo'], Any]] = None
 
+        self._encoder: 'ALSJsonEncoder' = ALSJsonEncoder()
         self._recv_thread: Optional['Thread'] = None
         self._partial_data: bytes = b''
 
@@ -120,9 +123,16 @@ class AnimationSender(object):
 
         return self
 
-    def send_data(self, animation_json: AnyStr) -> 'AnimationSender':
-        """Send a new animation to the server"""
-        json_bytes = bytearray(animation_json + ";;;", 'utf-8')
+    def send(self, data: Union['AnimationToRunParams', 'ClientParams',
+                               'Command', 'EndAnimation', 'Section']) -> 'AnimationSender':
+        """Send data to the server"""
+        self.send_json(self._encoder.encode(data))
+
+        return self
+
+    def send_json(self, json: AnyStr) -> 'AnimationSender':
+        """Send encoded JSON to the server"""
+        json_bytes = bytearray(json + ";;;", 'utf-8')
         self.connection.sendall(json_bytes)
 
         return self

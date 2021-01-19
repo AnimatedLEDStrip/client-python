@@ -1,7 +1,10 @@
 from animatedledstrip import AnimationSender, Command
 from animatedledstrip.json_encoder import ALSJsonEncoder
 
-sender = AnimationSender("10.0.0.91", 6)
+ip = input('Enter IP address: ')
+port = int(input('Enter port: '))
+
+sender = AnimationSender(ip, port)
 encoder = ALSJsonEncoder()
 
 
@@ -14,4 +17,6 @@ sender.on_receive_callback = receive
 sender.start()
 
 while True:
-    sender.send_data(encoder.encode(Command(input())))
+    cmd = input('Enter command: ')
+    if cmd != '':
+        sender.send(Command(cmd))
