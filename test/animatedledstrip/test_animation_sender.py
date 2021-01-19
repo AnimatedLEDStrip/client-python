@@ -29,7 +29,7 @@ def test_constructor():
     assert sender.address == '10.0.0.254'
     assert sender.port == 5
     assert sender.connected is False
-    assert sender.recv_thread is None
+    assert sender._recv_thread is None
     assert sender.running_animations == {}
     assert sender.strip_info is None
     assert sender.supported_animations == []

@@ -1,99 +1,123 @@
-#   Copyright (c) 2019-2020 AnimatedLEDStrip
+#  Copyright (c) 2018-2021 AnimatedLEDStrip
 #
-#   Permission is hereby granted, free of charge, to any person obtaining a copy
-#   of this software and associated documentation files (the "Software"), to deal
-#   in the Software without restriction, including without limitation the rights
-#   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#   copies of the Software, and to permit persons to whom the Software is
-#   furnished to do so, subject to the following conditions:
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-#   The above copyright notice and this permission notice shall be included in
-#   all copies or substantial portions of the Software.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
 #
-#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#   THE SOFTWARE.
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#  THE SOFTWARE.
 
-import json
-from typing import AnyStr
+from typing import List, Optional, Dict
 
-from .param_usage import ParamUsage
-from .utils import check_data_type
+
+class AnimationParameter(object):
+    """Specifies an animation parameter that can be sent to an animation"""
+
+    def __init__(self, name: str = '', description: str = '', default=None, data_type=None):
+        self.name: str = name
+        self.description: str = description
+        self.default = default
+        self.data_type = data_type
+
+    def json_dict(self) -> Dict:
+        return {
+            'type': 'AnimationParameter',
+            'name': self.name,
+            'description': self.description,
+            'default': self.default,
+        }
 
 
 class AnimationInfo(object):
     """Stores information about an animation the server can run"""
 
-    def __init__(self):
-        self.name: str = ''
-        self.abbr: str = ''
-        self.description: str = ''
-        self.signature_file: str = ''
-        self.repetitive: bool = False
-        self.minimum_colors: int = 0
-        self.unlimited_colors: bool = False
-        self.center: 'ParamUsage' = ParamUsage.NOTUSED
-        self.delay: 'ParamUsage' = ParamUsage.NOTUSED
-        self.direction: 'ParamUsage' = ParamUsage.NOTUSED
-        self.distance: 'ParamUsage' = ParamUsage.NOTUSED
-        self.spacing: 'ParamUsage' = ParamUsage.NOTUSED
-        self.delay_default: int = 50
-        self.distance_default: int = -1
-        self.spacing_default: int = 3
+    def __init__(self,
+                 name: str = '',
+                 abbr: str = '',
+                 description: str = '',
+                 run_count_default: int = 0,
+                 minimum_colors: int = 0,
+                 unlimited_colors: bool = False,
+                 dimensionality: Optional[List[str]] = None,
+                 int_params: Optional[List[AnimationParameter]] = None,
+                 double_params: Optional[List[AnimationParameter]] = None,
+                 string_params: Optional[List[AnimationParameter]] = None,
+                 location_params: Optional[List[AnimationParameter]] = None,
+                 distance_params: Optional[List[AnimationParameter]] = None,
+                 rotation_params: Optional[List[AnimationParameter]] = None,
+                 equation_params: Optional[List[AnimationParameter]] = None):
+        self.name: str = name
+        self.abbr: str = abbr
+        self.description: str = description
+        self.run_count_default: int = run_count_default
+        self.minimum_colors: int = minimum_colors
+        self.unlimited_colors: bool = unlimited_colors
 
-    @classmethod
-    def from_json(cls, input_str: AnyStr) -> 'AnimationInfo':
-        """Create an AnimationInfo instance from a JSON representation"""
-        # Parse the JSON
-        input_json = json.loads(input_str[5:])
+        if dimensionality is None:
+            self.dimensionality: List[str] = []
+        else:
+            self.dimensionality: List[str] = dimensionality
 
-        # Create a new AnimationInfo instance
-        new_instance = cls()
+        if int_params is None:
+            self.int_params: List[AnimationParameter] = []
+        else:
+            self.int_params: List[AnimationParameter] = int_params
 
-        # Get each property from the JSON, reverting to defaults if it can't be found
-        new_instance.name = input_json.get('name', new_instance.name)
-        new_instance.abbr = input_json.get('abbr', new_instance.abbr)
-        new_instance.description = input_json.get('description', new_instance.description)
-        new_instance.signature_file = input_json.get('signatureFile', new_instance.signature_file)
-        new_instance.repetitive = input_json.get('repetitive', new_instance.repetitive)
-        new_instance.minimum_colors = input_json.get('minimumColors', new_instance.minimum_colors)
-        new_instance.unlimited_colors = input_json.get('unlimitedColors', new_instance.unlimited_colors)
-        new_instance.center = ParamUsage[input_json.get('center', new_instance.center.name)]
-        new_instance.delay = ParamUsage[input_json.get('delay', new_instance.delay.name)]
-        new_instance.direction = ParamUsage[input_json.get('direction', new_instance.direction.name)]
-        new_instance.distance = ParamUsage[input_json.get('distance', new_instance.distance.name)]
-        new_instance.spacing = ParamUsage[input_json.get('spacing', new_instance.spacing.name)]
-        new_instance.delay_default = input_json.get('delayDefault', new_instance.delay_default)
-        new_instance.distance_default = input_json.get('distanceDefault', new_instance.distance_default)
-        new_instance.spacing_default = input_json.get('spacingDefault', new_instance.spacing_default)
+        if double_params is None:
+            self.double_params: List[AnimationParameter] = []
+        else:
+            self.double_params: List[AnimationParameter] = double_params
 
-        # Double check that everything has the right data type
-        new_instance.check_data_types()
+        if string_params is None:
+            self.string_params: List[AnimationParameter] = []
+        else:
+            self.string_params: List[AnimationParameter] = string_params
 
-        return new_instance
+        if location_params is None:
+            self.location_params: List[AnimationParameter] = []
+        else:
+            self.location_params: List[AnimationParameter] = location_params
 
-    def check_data_types(self) -> bool:
-        """Check that all parameter types are correct"""
-        good_types = True
+        if distance_params is None:
+            self.distance_params: List[AnimationParameter] = []
+        else:
+            self.distance_params: List[AnimationParameter] = distance_params
 
-        good_types = good_types and check_data_type('name', self.name, str)
-        good_types = good_types and check_data_type('abbr', self.abbr, str)
-        good_types = good_types and check_data_type('description', self.description, str)
-        good_types = good_types and check_data_type('signature_file', self.signature_file, str)
-        good_types = good_types and check_data_type('repetitive', self.repetitive, bool)
-        good_types = good_types and check_data_type('minimum_colors', self.minimum_colors, int)
-        good_types = good_types and check_data_type('unlimited_colors', self.unlimited_colors, bool)
-        good_types = good_types and check_data_type('center', self.center, ParamUsage)
-        good_types = good_types and check_data_type('delay', self.delay, ParamUsage)
-        good_types = good_types and check_data_type('direction', self.direction, ParamUsage)
-        good_types = good_types and check_data_type('distance', self.distance, ParamUsage)
-        good_types = good_types and check_data_type('spacing', self.spacing, ParamUsage)
-        good_types = good_types and check_data_type('delay_default', self.delay_default, int)
-        good_types = good_types and check_data_type('distance_default', self.distance_default, int)
-        good_types = good_types and check_data_type('spacing_default', self.spacing_default, int)
+        if rotation_params is None:
+            self.rotation_params: List[AnimationParameter] = []
+        else:
+            self.rotation_params: List[AnimationParameter] = rotation_params
 
-        return good_types
+        if equation_params is None:
+            self.equation_params: List[AnimationParameter] = []
+        else:
+            self.equation_params: List[AnimationParameter] = equation_params
+
+    def json_dict(self) -> Dict:
+        return {
+            'name': self.name,
+            'abbr': self.abbr,
+            'description': self.description,
+            'runCountDefault': self.run_count_default,
+            'minimumColors': self.minimum_colors,
+            'unlimitedColors': self.unlimited_colors,
+            'dimensionality': self.dimensionality,
+            'intParams': self.int_params,
+            "doubleParams": self.double_params,
+            "stringParams": self.string_params,
+            "locationParams": self.location_params,
+            "distanceParams": self.distance_params,
+            "rotationParams": self.rotation_params,
+            "equationParams": self.equation_params,
+        }

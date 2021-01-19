@@ -1,6 +1,6 @@
 from unittest import mock
 
-from animatedledstrip import AnimationInfo, ParamUsage
+from animatedledstrip import AnimationInfo
 
 
 def test_constructor():
@@ -13,11 +13,11 @@ def test_constructor():
     assert info.repetitive is False
     assert info.minimum_colors == 0
     assert info.unlimited_colors is False
-    assert info.center is ParamUsage.NOTUSED
-    assert info.delay is ParamUsage.NOTUSED
-    assert info.direction is ParamUsage.NOTUSED
-    assert info.distance is ParamUsage.NOTUSED
-    assert info.spacing is ParamUsage.NOTUSED
+    # assert info.center is ParamUsage.NOTUSED
+    # assert info.delay is ParamUsage.NOTUSED
+    # assert info.direction is ParamUsage.NOTUSED
+    # assert info.distance is ParamUsage.NOTUSED
+    # assert info.spacing is ParamUsage.NOTUSED
     assert info.delay_default == 50
     assert info.distance_default == -1
     assert info.spacing_default == 3
@@ -163,7 +163,7 @@ def test_unlimited_colors(caplog):
 def test_center(caplog):
     info = AnimationInfo()
 
-    info.center = ParamUsage.NOTUSED
+    # info.center = ParamUsage.NOTUSED
     assert info.check_data_types() is True
 
     info.center = 5.0
@@ -182,7 +182,7 @@ def test_center(caplog):
 def test_delay(caplog):
     info = AnimationInfo()
 
-    info.delay = ParamUsage.NOTUSED
+    # info.delay = ParamUsage.NOTUSED
     assert info.check_data_types() is True
 
     info.delay = 5.0
@@ -201,7 +201,7 @@ def test_delay(caplog):
 def test_direction(caplog):
     info = AnimationInfo()
 
-    info.direction = ParamUsage.NOTUSED
+    # info.direction = ParamUsage.NOTUSED
     assert info.check_data_types() is True
 
     info.direction = 5.0
@@ -222,7 +222,7 @@ def test_direction(caplog):
 def test_distance(caplog):
     info = AnimationInfo()
 
-    info.distance = ParamUsage.NOTUSED
+    # info.distance = ParamUsage.NOTUSED
     assert info.check_data_types() is True
 
     info.distance = 5.0
@@ -243,7 +243,7 @@ def test_distance(caplog):
 def test_spacing(caplog):
     info = AnimationInfo()
 
-    info.spacing = ParamUsage.NOTUSED
+    # info.spacing = ParamUsage.NOTUSED
     assert info.check_data_types() is True
 
     info.spacing = 5.0

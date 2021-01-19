@@ -18,17 +18,19 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-from typing import Dict
+from typing import List, Optional, Dict
 
 
-class Command(object):
-    """A command to send to the server"""
+class Equation:
 
-    def __init__(self, command: str = ''):
-        self.command: str = command
+    def __init__(self, coefficients: Optional[List[float]] = None):
+        if coefficients is None:
+            self.coefficients: List[float] = []
+        else:
+            self.coefficients: List[float] = coefficients
 
     def json_dict(self) -> Dict:
         return {
-            'type': 'Command',
-            'command': self.command,
+            'type': 'Equation',
+            'coefficients': self.coefficients,
         }

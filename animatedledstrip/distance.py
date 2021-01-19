@@ -21,14 +21,33 @@
 from typing import Dict
 
 
-class Command(object):
-    """A command to send to the server"""
+class AbsoluteDistance:
 
-    def __init__(self, command: str = ''):
-        self.command: str = command
+    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0):
+        self.x = x
+        self.y = y
+        self.z = z
 
     def json_dict(self) -> Dict:
         return {
-            'type': 'Command',
-            'command': self.command,
+            'type': 'AbsoluteDistance',
+            'x': self.x,
+            'y': self.y,
+            'z': self.z,
+        }
+
+
+class PercentDistance:
+
+    def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def json_dict(self) -> Dict:
+        return {
+            'type': 'PercentDistance',
+            'x': self.x,
+            'y': self.y,
+            'z': self.z,
         }

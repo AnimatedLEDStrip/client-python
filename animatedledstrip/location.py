@@ -21,14 +21,21 @@
 from typing import Dict
 
 
-class Command(object):
-    """A command to send to the server"""
+class Location(object):
+    """A location in 3D space"""
 
-    def __init__(self, command: str = ''):
-        self.command: str = command
+    def __init__(self,
+                 x: float = 0.0,
+                 y: float = 0.0,
+                 z: float = 0.0):
+        self.x: float = x
+        self.y: float = y
+        self.z: float = z
 
     def json_dict(self) -> Dict:
         return {
-            'type': 'Command',
-            'command': self.command,
+            'type': 'Location',
+            'x': self.x,
+            'y': self.y,
+            'z': self.z,
         }

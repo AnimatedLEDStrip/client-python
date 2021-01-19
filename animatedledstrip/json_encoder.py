@@ -18,17 +18,17 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-from typing import Dict
+import json
+from json import JSONEncoder
+from typing import Any
 
 
-class Command(object):
-    """A command to send to the server"""
+class ALSJsonEncoder(JSONEncoder):
 
-    def __init__(self, command: str = ''):
-        self.command: str = command
-
-    def json_dict(self) -> Dict:
-        return {
-            'type': 'Command',
-            'command': self.command,
-        }
+    def default(self, o: Any) -> Any:
+        # print(type(o))
+        if hasattr(o, "json_dict"):
+            # noinspection PyCallingNonCallable
+            return o.json_dict()
+        else:
+            return json.JSONEncoder.default(self, o)
