@@ -34,7 +34,7 @@ class DegreesRotation:
         self.z_rotation: float = z_rotation
 
         if rotation_order is None:
-            self.rotation_order = ['ROTATE_X', 'ROTATE_Z']
+            self.rotation_order = ['ROTATE_Z', 'ROTATE_X']
         else:
             self.rotation_order = rotation_order
 
@@ -61,7 +61,7 @@ class RadiansRotation:
         self.z_rotation: float = z_rotation
 
         if rotation_order is None:
-            self.rotation_order = ['ROTATE_X', 'ROTATE_Z']
+            self.rotation_order = ['ROTATE_Z', 'ROTATE_X']
         else:
             self.rotation_order = rotation_order
 
