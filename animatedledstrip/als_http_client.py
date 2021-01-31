@@ -99,7 +99,7 @@ class ALSHttpClient:
         return self.get_section('fullStrip')
 
     def create_new_section(self, new_section: 'Section') -> 'Section':
-        return self.decoder.decode_with_type(self._post_data('/sections/newSection', new_section), 'Section')
+        return self.decoder.decode_with_type(self._post_data('/sections', new_section), 'Section')
 
     def start_animation(self, anim_params: 'AnimationToRunParams') -> 'RunningAnimationParams':
         return self.decoder.decode_with_type(self._post_data('/start', anim_params), 'RunningAnimationParams')
