@@ -67,7 +67,8 @@ class AnimationSender:
         self.on_new_section_callback: Optional[Callable[['Section'], Any]] = None
         self.on_new_strip_info_callback: Optional[Callable[['StripInfo'], Any]] = None
 
-        self._encoder: 'ALSJsonEncoder' = ALSJsonEncoder()
+        self.encoder: 'ALSJsonEncoder' = ALSJsonEncoder()
+
         self._recv_thread: Optional['Thread'] = None
         self._partial_data: bytes = b''
 
@@ -126,7 +127,7 @@ class AnimationSender:
     def send(self, data: Union['AnimationToRunParams', 'ClientParams',
                                'Command', 'EndAnimation', 'Section']) -> 'AnimationSender':
         """Send data to the server"""
-        self.send_json(self._encoder.encode(data))
+        self.send_json(self.encoder.encode(data))
 
         return self
 

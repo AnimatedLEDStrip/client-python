@@ -17,7 +17,7 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
-
+import json
 from json import JSONDecoder
 from typing import Dict, Any
 
@@ -52,11 +52,28 @@ class ALSJsonDecoder(JSONDecoder):
     def decode_dict(self, json: Dict) -> Any:
         return self.decode(self.encoder.encode(json))
 
+    def decode_with_type(self, obj, data_type: str):
+        return self.decode_dict(add_dicts(json.loads(obj), {"type": data_type}))
+
+    def decode_list_with_type(self, obj, data_type: str):
+        json_list = json.loads(obj)
+        decoded_list = []
+        for o in json_list:
+            decoded_list.append(self.decode_dict(add_dicts(o, {"type": data_type})))
+        return decoded_list
+
+    def decode_map_with_type(self, obj, data_type: str):
+        json_dict = json.loads(obj)
+        decoded_dict = {}
+        for k in json_dict:
+            decoded_dict.update({k: self.decode_dict(add_dicts(json_dict[k], {"type": data_type}))})
+        return decoded_dict
+
     def object_hook(self, obj):
         data_type = obj.get('type', '')
         if data_type == 'AbsoluteDistance':
             return AbsoluteDistance(obj['x'], obj['y'], obj['z'])
-        if data_type == 'AnimationInfo':
+        elif data_type == 'AnimationInfo':
             return AnimationInfo(
                 name=obj['name'],
                 abbr=obj['abbr'],

@@ -27,7 +27,7 @@ class ALSJsonEncoder(JSONEncoder):
 
     def default(self, o: Any) -> Any:
         # print(type(o))
-        if hasattr(o, "json_dict"):
+        if hasattr(o, 'json_dict'):
             # noinspection PyCallingNonCallable
             return o.json_dict()
         else:
