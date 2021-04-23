@@ -24,13 +24,9 @@ from typing import Dict, Any
 from .animation_info import AnimationInfo, AnimationParameter
 from .animation_to_run_params import AnimationToRunParams
 from .color_container import ColorContainer, PreparedColorContainer
-from .command import Command
-from .current_strip_color import CurrentStripColor
 from .distance import AbsoluteDistance, PercentDistance
-from .end_animation import EndAnimation
 from .json_encoder import ALSJsonEncoder
 from .location import Location
-from .message import Message
 from .rotation import DegreesRotation, RadiansRotation
 from .running_animation_params import RunningAnimationParams
 from .section import Section
@@ -52,7 +48,7 @@ class ALSJsonDecoder(JSONDecoder):
     def decode_dict(self, json: Dict) -> Any:
         return self.decode(self.encoder.encode(json))
 
-    def decode_with_type(self, obj, data_type: str):
+    def decode_object_with_type(self, obj, data_type: str):
         return self.decode_dict(add_dicts(json.loads(obj), {"type": data_type}))
 
     def decode_list_with_type(self, obj, data_type: str):
@@ -134,18 +130,10 @@ class ALSJsonDecoder(JSONDecoder):
             )
         elif data_type == 'ColorContainer':
             return ColorContainer(obj['colors'])
-        elif data_type == 'Command':
-            return Command(obj['command'])
-        elif data_type == 'CurrentStripColor':
-            return CurrentStripColor(obj['color'])
         elif data_type == 'DegreesRotation':
             return DegreesRotation(obj['xRotation'], obj['yRotation'], obj['zRotation'], obj['rotationOrder'])
-        elif data_type == 'EndAnimation':
-            return EndAnimation(obj['id'])
         elif data_type == 'Location':
             return Location(obj['x'], obj['y'], obj['z'])
-        elif data_type == 'Message':
-            return Message(obj['message'])
         elif data_type == 'PercentDistance':
             return PercentDistance(obj['x'], obj['y'], obj['z'])
         elif data_type == 'PreparedColorContainer':

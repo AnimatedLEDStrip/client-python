@@ -17,18 +17,20 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
+
 import json
 from urllib.request import Request, urlopen
-from typing import TYPE_CHECKING, List, Dict, Any
+from typing import Any, Dict, List, TYPE_CHECKING
 
-from animatedledstrip import RunningAnimationParams, Section, StripInfo
-from animatedledstrip.animation_to_run_params import AnimationToRunParams
 from animatedledstrip.json_decoder import ALSJsonDecoder
 from animatedledstrip.json_encoder import ALSJsonEncoder
 
 if TYPE_CHECKING:
     from animatedledstrip.animation_info import AnimationInfo
-    from animatedledstrip.current_strip_color import CurrentStripColor
+    from animatedledstrip.animation_to_run_params import AnimationToRunParams
+    from animatedledstrip.running_animation_params import RunningAnimationParams
+    from animatedledstrip.section import Section
+    from animatedledstrip.strip_info import StripInfo
 
 
 class ALSHttpClient:
@@ -54,9 +56,9 @@ class ALSHttpClient:
         return urlopen(Request(self._resolve_url(url), method='DELETE')).read()
 
     def get_animation_info(self, anim_name: str) -> 'AnimationInfo':
-        return self.decoder.decode_with_type(self._get_data('/animation/' + anim_name), 'AnimationInfo')
+        return self.decoder.decode_object_with_type(self._get_data('/animation/' + anim_name), 'AnimationInfo')
 
-    def get_supported_animation_names(self) -> List[str]:
+    def get_supported_animations_names(self) -> List[str]:
         return json.loads(self._get_data('/animations/names'))
 
     def get_supported_animations(self) -> List['AnimationInfo']:
@@ -75,10 +77,10 @@ class ALSHttpClient:
         return json.loads(self._get_data('/running/ids'))
 
     def get_running_animation_params(self, anim_id: str) -> 'RunningAnimationParams':
-        return self.decoder.decode_with_type(self._get_data('/running/' + anim_id), 'RunningAnimationParams')
+        return self.decoder.decode_object_with_type(self._get_data('/running/' + anim_id), 'RunningAnimationParams')
 
     def end_animation(self, anim_id: str) -> 'RunningAnimationParams':
-        return self.decoder.decode_with_type(self._delete_data('/running/' + anim_id), 'RunningAnimationParams')
+        return self.decoder.decode_object_with_type(self._delete_data('/running/' + anim_id), 'RunningAnimationParams')
 
     def end_animation_from_params(self, anim_params: 'RunningAnimationParams') -> 'RunningAnimationParams':
         return self.end_animation(anim_params.anim_id)
@@ -92,23 +94,23 @@ class ALSHttpClient:
     def get_sections_dict(self) -> Dict[str, 'Section']:
         return self.get_sections_map()
 
-    def get_section(self, section_id: str) -> 'Section':
-        return self.decoder.decode_with_type(self._get_data('/sections/' + section_id), 'Section')
+    def get_section(self, section_name: str) -> 'Section':
+        return self.decoder.decode_object_with_type(self._get_data('/sections/' + section_name), 'Section')
 
     def get_full_strip_section(self) -> 'Section':
         return self.get_section('fullStrip')
 
     def create_new_section(self, new_section: 'Section') -> 'Section':
-        return self.decoder.decode_with_type(self._post_data('/sections', new_section), 'Section')
+        return self.decoder.decode_object_with_type(self._post_data('/sections', new_section), 'Section')
 
     def start_animation(self, anim_params: 'AnimationToRunParams') -> 'RunningAnimationParams':
-        return self.decoder.decode_with_type(self._post_data('/start', anim_params), 'RunningAnimationParams')
+        return self.decoder.decode_object_with_type(self._post_data('/start', anim_params), 'RunningAnimationParams')
 
     def get_strip_info(self) -> 'StripInfo':
-        return self.decoder.decode_with_type(self._get_data('/strip/info'), 'StripInfo')
+        return self.decoder.decode_object_with_type(self._get_data('/strip/info'), 'StripInfo')
 
-    def get_current_strip_color(self) -> 'CurrentStripColor':
-        return self.decoder.decode_with_type(self._get_data('/strip/color'), 'CurrentStripColor')
+    def get_current_strip_color(self) -> List[int]:
+        return json.loads(self._get_data('/strip/color'))
 
     def clear_strip(self):
         # TODO: Fix 404
