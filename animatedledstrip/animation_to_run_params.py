@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from animatedledstrip.rotation import DegreesRotation, RadiansRotation
 
 
-class AnimationToRunParams(object):
+class AnimationToRunParams:
     """Describes the properties of an animation to run"""
 
     def __init__(self,
@@ -92,7 +92,6 @@ class AnimationToRunParams(object):
 
     def json_dict(self) -> Dict:
         return {
-            "type": "AnimationToRunParams",
             "animation": self.animation,
             "colors": self.colors,
             "id": self.anim_id,

@@ -38,7 +38,6 @@ class Section(object):
 
     def json_dict(self) -> Dict:
         return {
-            'type': 'Section',
             'name': self.name,
             'pixels': self.pixels,
             'parentSectionName': self.parent_section_name,

@@ -95,7 +95,6 @@ class RunningAnimationParams:
 
     def json_dict(self) -> Dict:
         return {
-            "type": "RunningAnimationParams",
             "animationName": self.animation_name,
             "colors": self.colors,
             "id": self.anim_id,

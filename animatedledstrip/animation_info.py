@@ -21,7 +21,7 @@
 from typing import List, Optional, Dict
 
 
-class AnimationParameter(object):
+class AnimationParameter:
     """Specifies an animation parameter that can be sent to an animation"""
 
     def __init__(self, name: str = '', description: str = '', default=None, data_type=None):
@@ -32,14 +32,13 @@ class AnimationParameter(object):
 
     def json_dict(self) -> Dict:
         return {
-            'type': 'AnimationParameter',
             'name': self.name,
             'description': self.description,
             'default': self.default,
         }
 
 
-class AnimationInfo(object):
+class AnimationInfo:
     """Stores information about an animation the server can run"""
 
     def __init__(self,

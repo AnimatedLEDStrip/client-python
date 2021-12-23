@@ -18,23 +18,23 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-from typing import Dict
+from typing import Dict, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from animatedledstrip.animation_info import AnimationInfo
 
 
-class Location(object):
-    """A location in 3D space"""
+class NewAnimationGroupInfo:
+    """Stores information about a new animation group to create"""
 
-    def __init__(self,
-                 x: float = 0.0,
-                 y: float = 0.0,
-                 z: float = 0.0):
-        self.x: float = x
-        self.y: float = y
-        self.z: float = z
+    def __init__(self, group_type: str, group_info: 'AnimationInfo', animation_list: List[str]):
+        self.group_type: str = group_type
+        self.group_info: 'AnimationInfo' = group_info
+        self.animation_list: List[str] = animation_list
 
     def json_dict(self) -> Dict:
         return {
-            'x': self.x,
-            'y': self.y,
-            'z': self.z,
+            "groupType": self.group_type,
+            "groupInfo": self.group_info,
+            "animationList": self.animation_list,
         }

@@ -28,6 +28,7 @@ from animatedledstrip.json_encoder import ALSJsonEncoder
 if TYPE_CHECKING:
     from animatedledstrip.animation_info import AnimationInfo
     from animatedledstrip.animation_to_run_params import AnimationToRunParams
+    from animatedledstrip.new_animation_group_info import NewAnimationGroupInfo
     from animatedledstrip.running_animation_params import RunningAnimationParams
     from animatedledstrip.section import Section
     from animatedledstrip.strip_info import StripInfo
@@ -58,9 +59,6 @@ class ALSHttpClient:
     def get_animation_info(self, anim_name: str) -> 'AnimationInfo':
         return self.decoder.decode_object_with_type(self._get_data('/animation/' + anim_name), 'AnimationInfo')
 
-    def get_supported_animations_names(self) -> List[str]:
-        return json.loads(self._get_data('/animations/names'))
-
     def get_supported_animations(self) -> List['AnimationInfo']:
         return self.decoder.decode_list_with_type(self._get_data('/animations'), 'AnimationInfo')
 
@@ -69,6 +67,12 @@ class ALSHttpClient:
 
     def get_supported_animations_dict(self) -> Dict[str, 'AnimationInfo']:
         return self.get_supported_animations_map()
+
+    def get_supported_animations_names(self) -> List[str]:
+        return json.loads(self._get_data('/animations/names'))
+
+    def create_new_group(self, new_group: 'NewAnimationGroupInfo'):
+        return self.decoder.decode_object_with_type(self._post_data('/animations/newGroup', new_group), 'AnimationInfo')
 
     def get_running_animations(self) -> Dict[str, 'RunningAnimationParams']:
         return self.decoder.decode_map_with_type(self._get_data('/running'), 'RunningAnimationParams')
@@ -82,11 +86,14 @@ class ALSHttpClient:
     def end_animation(self, anim_id: str) -> 'RunningAnimationParams':
         return self.decoder.decode_object_with_type(self._delete_data('/running/' + anim_id), 'RunningAnimationParams')
 
-    def end_animation_from_params(self, anim_params: 'RunningAnimationParams') -> 'RunningAnimationParams':
-        return self.end_animation(anim_params.anim_id)
+    def get_section(self, section_name: str) -> 'Section':
+        return self.decoder.decode_object_with_type(self._get_data('/sections/' + section_name), 'Section')
 
     def get_sections(self) -> List['Section']:
         return self.decoder.decode_list_with_type(self._get_data('/sections'), 'Section')
+
+    def create_new_section(self, new_section: 'Section') -> 'Section':
+        return self.decoder.decode_object_with_type(self._post_data('/sections', new_section), 'Section')
 
     def get_sections_map(self) -> Dict[str, 'Section']:
         return self.decoder.decode_map_with_type(self._get_data('/sections/map'), 'Section')
@@ -94,24 +101,21 @@ class ALSHttpClient:
     def get_sections_dict(self) -> Dict[str, 'Section']:
         return self.get_sections_map()
 
-    def get_section(self, section_name: str) -> 'Section':
-        return self.decoder.decode_object_with_type(self._get_data('/sections/' + section_name), 'Section')
-
-    def get_full_strip_section(self) -> 'Section':
-        return self.get_section('fullStrip')
-
-    def create_new_section(self, new_section: 'Section') -> 'Section':
-        return self.decoder.decode_object_with_type(self._post_data('/sections', new_section), 'Section')
-
     def start_animation(self, anim_params: 'AnimationToRunParams') -> 'RunningAnimationParams':
         return self.decoder.decode_object_with_type(self._post_data('/start', anim_params), 'RunningAnimationParams')
-
-    def get_strip_info(self) -> 'StripInfo':
-        return self.decoder.decode_object_with_type(self._get_data('/strip/info'), 'StripInfo')
-
-    def get_current_strip_color(self) -> List[int]:
-        return json.loads(self._get_data('/strip/color'))
 
     def clear_strip(self):
         # TODO: Fix 404
         self._post_data('/strip/clear', None)
+
+    def get_current_strip_color(self) -> List[int]:
+        return json.loads(self._get_data('/strip/color'))
+
+    def get_strip_info(self) -> 'StripInfo':
+        return self.decoder.decode_object_with_type(self._get_data('/strip/info'), 'StripInfo')
+
+    def end_animation_from_params(self, anim_params: 'RunningAnimationParams') -> 'RunningAnimationParams':
+        return self.end_animation(anim_params.anim_id)
+
+    def get_full_strip_section(self) -> 'Section':
+        return self.get_section('fullStrip')
