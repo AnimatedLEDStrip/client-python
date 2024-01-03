@@ -26,7 +26,7 @@ sender = ALSHttpClient('10.0.0.254')
 
 ## Communicating with the Server
 
-This library follows the conventions laid out for [AnimatedLEDStrip client libraries](https://animatedledstrip.github.io/client-libraries), with the following modifications:
+This library follows the conventions laid out for [AnimatedLEDStrip client libraries](https://animatedledstrip.github.io/clients/libraries), with the following modifications:
 
 - Function names and class variables are in snake case to follow Python style conventions
 - `get_supported_animations_dict` is provided as an alias for `get_supported_animations_map`
