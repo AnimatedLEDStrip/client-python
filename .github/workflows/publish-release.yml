@@ -31,7 +31,7 @@ jobs:
   publish-test:
     runs-on: ubuntu-latest
     needs: package
-    if: github.event.release.prerelease
+    if: "!github.event.release.prerelease"
     environment:
       name: testpypi
       url: https://test.pypi.org/p/animatedledstrip-client
@@ -44,7 +44,7 @@ jobs:
           name: client-python-distributions
           path: dist/
 
-      - name: Publish to PyPi
+      - name: Publish to Test PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
