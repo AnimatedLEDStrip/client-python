@@ -104,6 +104,12 @@ class ALSHttpClient:
     def start_animation(self, anim_params: 'AnimationToRunParams') -> 'RunningAnimationParams':
         return self.decoder.decode_object_with_type(self._post_data('/start', anim_params), 'RunningAnimationParams')
 
+    def save_animation(self, anim_params: 'AnimationToRunParams') -> str:
+        return self._post_data('/save', anim_params)
+
+    def get_saved_animations(self) -> List['AnimationToRunParams']:
+        return self.decoder.decode_list_with_type(self._get_data('/saved'), 'AnimationToRunParams')
+
     def clear_strip(self):
         # TODO: Fix 404
         self._post_data('/strip/clear', None)
