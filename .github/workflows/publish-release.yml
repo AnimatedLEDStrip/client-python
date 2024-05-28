@@ -2,7 +2,8 @@ name: publish-release
 
 on:
   release:
-    types: [ created ]
+    types:
+      - published
 
 
 jobs:
@@ -30,6 +31,7 @@ jobs:
   publish-test:
     runs-on: ubuntu-latest
     needs: package
+    if: github.event.release.prerelease
     environment:
       name: testpypi
       url: https://test.pypi.org/p/animatedledstrip-client
@@ -50,6 +52,7 @@ jobs:
 #  publish:
 #    runs-on: ubuntu-latest
 #    needs: package
+#    if: "!github.event.release.prerelease"
 #    environment:
 #      name: pypi
 #      url: https://pypi.org/p/animatedledstrip-client
